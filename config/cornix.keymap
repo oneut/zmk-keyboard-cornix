@@ -249,17 +249,17 @@
             //               |     |      |      |      |        |  |       |      |       |       |      |
 
             bindings = <
-&none  &bt BT_CLR_ALL  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &none                    &kp INSERT     &kp PAGE_UP  &kp UP    &kp PAGE_DOWN  &none  &none
-&none  &kp LGUI        &kp LALT      &kp LCTRL     &kp LSHFT     &kp TAB                  &kp BACKSPACE  &kp LEFT     &kp DOWN  &kp RIGHT      &none  &none
-&none  &kp LC(Z)       &kp LC(X)     &kp LC(C)     &kp LC(V)     &none    &trans  &trans  &kp DEL        &kp HOME     &none     &kp END        &none  &none
-&none  &none           &none         &trans        &trans        &none                    &none          &lt 3 ENTER  &mo 1     &none          &none  &none
+&none  &none      &none      &none      &none      &none                    &kp INSERT     &kp PAGE_UP  &kp UP    &kp PAGE_DOWN  &none  &none
+&none  &kp LGUI   &kp LALT   &kp LCTRL  &kp LSHFT  &kp TAB                  &kp BACKSPACE  &kp LEFT     &kp DOWN  &kp RIGHT      &none  &none
+&none  &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)  &none    &trans  &trans  &kp DEL        &kp HOME     &none     &kp END        &none  &none
+&none  &none      &none      &trans     &trans     &none                    &none          &lt 3 ENTER  &mo 1     &none          &none  &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
-        fn_layer {
-            display-name = "Mix";
+        move_layer {
+            display-name = "Move";
 
             // ------------------------------------------------------------------------------------------------------------
             // | BTCLR | BT1  | BT2  |  BT3  |  BT4  |  BT5 |                |      |      |       |      |       |       |
@@ -273,6 +273,26 @@
 &none  &kp F5  &kp F6   &kp F7   &kp F8        &kp TAB                  &none  &kp RSHIFT  &kp RCTRL  &kp RALT  &kp RGUI  &none
 &none  &kp F9  &kp F10  &kp F11  &kp F12       &none    &trans  &trans  &none  &none       &none      &none     &none     &none
 &none  &none   &none    &mo 1    &lt 2 ESCAPE  &none                    &none  &trans      &trans     &none     &none     &none
+            >;
+
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
+        };
+
+        meta_layer {
+            display-name = "Meta";
+
+            // ------------------------------------------------------------------------------------------------------------
+            // | BTCLR | BT1  | BT2  |  BT3  |  BT4  |  BT5 |                |      |      |       |      |       |       |
+            // |       | INS  | PSCR | GUI   |       |      |                | PGUP |      |   ^   |      |       |       |
+            // |       | ALT  | CTRL | SHIFT |       | CAPS |                | PGDN |   <- |   v   |  ->  |  DEL  | BKSPC |
+            // |       | UNDO | CUT  | COPY  | PASTE |      |      |  |      |      |      |       |      |       |       |
+            //                |      |       |       |      |      |  |      |      |      |       |      |
+
+            bindings = <
+&none  &bt BT_CLR_ALL  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &none                  &none  &none  &none  &none  &none  &none
+&none  &none           &none         &none         &none         &none                  &none  &none  &none  &none  &none  &none
+&none  &none           &none         &none         &none         &none  &trans  &trans  &none  &none  &none  &none  &none  &none
+&none  &none           &none         &none         &none         &none                  &none  &none  &none  &none  &none  &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
