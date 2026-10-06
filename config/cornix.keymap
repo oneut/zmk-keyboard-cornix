@@ -7,30 +7,35 @@
 #include "zmk-helpers/helper.h"
 #include "includes/cornix54.h"
 
-// tap windows for ctl alt and gui
+// tap windows for ctl alt
+// 変更するときは 1 か所ずつ変え、コミットメッセージに理由 (症状) を残すこと
 
 #define HM_TAPPING_TERM 250
-#define HM_TAPPING_REPEAT 210
+#define HM_PRIOR_IDLE   100  // 2026-10: 70 -> 100 (タイピング中の誤爆対策。文字直後のショートカットが効かなければ下げる)
 
-// quick tapping for shift
+// shift
 
-#define HM_TAPPING_TERM_FAST 190
-#define HM_PRIOR_IDLE 70
-#define BASE 0
-#define WIN 1
-#define LOWER 2
-#define RAISE 3
-#define ADJUST 4
-#define NAVI   5
-#define NUM    6
-#define DEBUG  7
+#define HM_TAPPING_TERM_SHIFT 190
+#define HM_PRIOR_IDLE_SHIFT   70
+
+// layer-tap (&lt)
+
+#define LT_TAPPING_TERM 250
+#define LT_QUICK_TAP    175  // urob と同じ値。タップ直後に再度押したままにするとタップ側 (Space のリピート等) になる
+
+// layers
+
+#define BASE 0  // 英字
+#define SYM  1  // 数字・記号
+#define NAV  2  // カーソル・編集
+#define FUNC 3  // ファンクションキー
+#define META 4  // Bluetooth
 
 // https://github.com/urob/zmk-config/tree/main#timeless-homerow-mods
 
 #define KEYS_L LT0 LT1 LT2 LT3 LT4 LT5 LM0 LM1 LM2 LM3 LM4 LM5 LB0 LB1 LB2 LB3 LB4 LB5  // left hand
 #define KEYS_R RT0 RT1 RT2 RT3 RT4 RT5 RM0 RM1 RM2 RM3 RM4 RM5 RB0 RB1 RB2 RB3 RB4 RB5  // right hand
-#define THUMBS LH1 LH0 RH0 RH1
-#define KEYS_T LH1 LH0 RH0 RH1
+#define KEYS_T LH2 LH1 RH1 RH2  // 実際に使っている親指キー (41 42 | 45 46)
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 15
 
 // 日本語キーボードのまま使用するための変換定義
@@ -65,8 +70,6 @@
 #include <dt-bindings/zmk/pointing.h>
 
 / {
-    // Activate ADJUST layer by pressing raise and lower
-
     behaviors {
         hm_l: homerow_mods_left {
             compatible = "zmk,behavior-hold-tap";
@@ -95,20 +98,17 @@
         };
 
         // Positional Homerow mods for shift
-        // Use faster tapping term and disable some features that may
-        // cause false negatives.
+        // Ctrl/Alt とは別に tapping-term / prior-idle を調整できるよう定数を分けている。
 
         hm_shift_l: hm_shift_l {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             bindings = <&kp>, <&kp>;
 
-            //flavor = "balanced";
-
             flavor = "balanced";
-            tapping-term-ms = <HM_TAPPING_TERM_FAST>;
+            tapping-term-ms = <HM_TAPPING_TERM_SHIFT>;
             quick-tap-ms = <200>;
-            require-prior-idle-ms = <HM_PRIOR_IDLE>;
+            require-prior-idle-ms = <HM_PRIOR_IDLE_SHIFT>;
             hold-trigger-key-positions = <KEYS_R KEYS_T>;
             hold-trigger-on-release;
         };
@@ -119,13 +119,10 @@
             bindings = <&kp>, <&kp>;
 
             flavor = "balanced";
-            tapping-term-ms = <HM_TAPPING_TERM_FAST>;
+            tapping-term-ms = <HM_TAPPING_TERM_SHIFT>;
             quick-tap-ms = <200>;
-            require-prior-idle-ms = <HM_PRIOR_IDLE>;
+            require-prior-idle-ms = <HM_PRIOR_IDLE_SHIFT>;
             hold-trigger-key-positions = <KEYS_L KEYS_T>;
-
-            // for quick tapping; shift+~
-
             hold-trigger-on-release;
         };
 
@@ -134,13 +131,15 @@
             #binding-cells = <2>;
             bindings = <&kp>, <&kp>;
 
-            flavor = "balanced";
+            // tap-preferred: 他のキーの押下・解放では GUI に確定せず、tapping-term 経過で GUI になる。
+            // ローマ字では "am" のような a → 反対の手 のロールが多く、balanced だと super+m 等が誤発火するため。
+            // (prior-idle / quick-tap / hold-trigger-key-positions の条件は引き続き効く。語頭の a は prior-idle では守れない)
+            flavor = "tap-preferred";
             tapping-term-ms = <280>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <150>;
             hold-trigger-key-positions = <KEYS_R KEYS_T>;
-
-            hold-trigger-on-release;        
+            hold-trigger-on-release;
         };
 
         little_finger_r: little_finger_r {
@@ -148,51 +147,32 @@
             #binding-cells = <2>;
             bindings = <&kp>, <&kp>;
 
-            flavor = "balanced";
+            // tap-preferred: 他のキーの押下・解放では GUI に確定せず、tapping-term 経過で GUI になる。
+            // ローマ字では "am" のような a → 反対の手 のロールが多く、balanced だと super+m 等が誤発火するため。
+            // (prior-idle / quick-tap / hold-trigger-key-positions の条件は引き続き効く。語頭の a は prior-idle では守れない)
+            flavor = "tap-preferred";
             tapping-term-ms = <280>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <150>;
             hold-trigger-key-positions = <KEYS_L KEYS_T>;
-
-            hold-trigger-on-release;        
+            hold-trigger-on-release;
         };
 
 
-        /*
-         * Non-Positional Homerow Mods
-         * Used for &mm_grescm_gui behavior on left hand.
-         *
-         * Usage: &hm LSHFT T
-         * Tap: T
-         * Tap-Tap-Hold: Repeat T
-         * Hold: LSHIFT
-         */
-
-        hm: homerow_mods {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            bindings = <&kp>, <&kp>;
-
-            flavor = "balanced";
-            tapping-term-ms = <HM_TAPPING_TERM>;
-            quick-tap-ms = <200>;
-        };
-
+        // ZMK 標準の &lt (layer_tap: tap-preferred 200ms) の設定を上書きする。
+        // balanced: 押している間に別のキーを押して離すか、tapping-term を超えて押し続けるとレイヤーに入る。
+        // Space → 次の文字 のように Space を先に離すロールではレイヤーに入らない。
+        // (Space↓ X↓ X↑ Space↑ のように Space を後から離すとレイヤーに入る)
         lt: layer_tap {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             bindings = <&mo>, <&kp>;
 
-            flavor = "hold-preferred";
-            tapping-term-ms = <HM_TAPPING_TERM>;
-            // quick-tap-ms = <200>;
-            quick-tap-ms = <0>;
+            flavor = "balanced";
+            tapping-term-ms = <LT_TAPPING_TERM>;
+            quick-tap-ms = <LT_QUICK_TAP>;
         };
     };
-
-    conditional_layers { compatible = "zmk,conditional-layers"; };
-
-    combos { compatible = "zmk,combos"; };
 
     keymap {
         compatible = "zmk,keymap";
@@ -200,79 +180,80 @@
         default_layer {
             display-name = "Base";
 
-            // ------------------------------------------------------------------------------------------------------------
-            // |   `   |  1  |  2  |  3   |  4   |  5   |                   |  6   |  7    |  8    |  9   |   0   |       |
-            // |  ESC  |  Q  |  W  |  E   |  R   |  T   |                   |  Y   |  U    |  I    |  O   |   P   | BKSPC |
-            // |  TAB  |  A  |  S  |  D   |  F   |  G   |                   |  H   |  J    |  K    |  L   |   ;   |   '   |
-            // | SHIFT |  Z  |  X  |  C   |  V   |  B   |  MUTE  |  |       |  N   |  M    |  ,    |  .   |   /   | SHIFT |
-            //               | GUI | ALT  | CTRL | LOWER|  ENTER |  | SPACE | RAISE| CTRL  | ALT   | GUI  |
+            // ----------------------------------------------------------------------------------------
+            // |  Q   |  W   |  E   |  R   |  T   |                  |  Y   |  U   |  I   |  O   |  P    |
+            // | A    | S    | D    | F    |  G   |                  |  H   | J    | K    | L    | -     |
+            // | GUI  | ALT  | CTRL | SHFT |      |                  |      | SHFT | CTRL | ALT  | GUI   |
+            // |  Z   |  X   |  C   |  V   |  B   |  MUTE  |  | MB3 |  N   |  M   |  ,   |  .   | /     |
+            //                      | 無変換| SPC  |                  | FUNC | 変換 |
+            //                      | SYM   | NAV  |                  |      | SYM  |
 
             bindings = <
-&none  &kp Q                    &kp W         &kp E               &kp R                &kp T                        &kp Y  &kp U                 &kp I             &kp O         &kp P                        &none
-&none  &little_finger_l LGUI A  &hm_l LALT S  &hm_l LCTRL D       &hm_shift_l LSHFT F  &kp G                        &kp H  &hm_shift_r RSHIFT J  &hm_r RCTRL K     &hm_r RALT L  &little_finger_r RGUI MINUS  &none
-&none  &kp Z                    &kp X         &kp C               &kp V                &kp B  &kp C_MUTE  &mkp MB3  &kp N  &kp M                 &kp COMMA         &kp DOT       &lt 4 SLASH                    &none
-&none  &none                    &none         &lt 1 INT_MUHENKAN  &lt 2 SPACE          &none                        &none  &mo 3                 &lt 1 INT_HENKAN  &none         &none                        &none
+&none  &kp Q                    &kp W         &kp E                 &kp R                &kp T                        &kp Y  &kp U                 &kp I               &kp O         &kp P                        &none
+&none  &little_finger_l LGUI A  &hm_l LALT S  &hm_l LCTRL D         &hm_shift_l LSHFT F  &kp G                        &kp H  &hm_shift_r RSHIFT J  &hm_r RCTRL K       &hm_r RALT L  &little_finger_r RGUI MINUS  &none
+&none  &kp Z                    &kp X         &kp C                 &kp V                &kp B  &kp C_MUTE  &mkp MB3  &kp N  &kp M                 &kp COMMA           &kp DOT       &kp SLASH                    &none
+&none  &none                    &none         &lt SYM INT_MUHENKAN  &lt NAV SPACE        &none                        &none  &mo FUNC              &lt SYM INT_HENKAN  &none         &none                        &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
         symbol_layer {
-            display-name = "Windows";
+            display-name = "Symbol";
 
-            // ------------------------------------------------------------------------------------------------------------
-            // |   `   |  1  |  2  |  3   |  4   |  5   |                   |  6   |  7    |  8    |  9   |   0   |       |
-            // |  ESC  |  Q  |  W  |  E   |  R   |  T   |                   |  Y   |  U    |  I    |  O   |   P   | BKSPC |
-            // |  TAB  |  A  |  S  |  D   |  F   |  G   |                   |  H   |  J    |  K    |  L   |   ;   |   '   |
-            // | SHIFT |  Z  |  X  |  C   |  V   |  B   |  MUTE  |  |       |  N   |  M    |  ,    |  .   |   /   | SHIFT |
-            //               | GUI | ALT  | CTRL | LOWER|  ENTER |  | SPACE | RAISE| CTRL  | ALT   | GUI  |
+            // ※ OS のキーボード配列は日本語 (JIS) 前提
+            // ----------------------------------------------------------------------------------------
+            // |  !   |  "   |  #   |  $   |  %   |                  |  &   |  '   |  (   |  )   |  |    |
+            // | 1    | 2    | 3    | 4    |  5   |                  |  _   | @    | [    | ]    | ~     |
+            // | GUI  | ALT  | CTRL | SHFT |      |                  |      | SHFT | CTRL | ALT  | GUI   |
+            // |  6   |  7   |  8   |  9   |  0   |        |  |     |  +   |  *   |  {   |  }   |  `    |
+            //                      | ^     | ¥    |                  | ;    | :    |
+            //                      | SYM   | NAV  |                  | FUNC | SYM  |
 
             bindings = <
-&trans  &kp LS(NUMBER_1)                &kp LS(NUMBER_2)     &kp LS(NUMBER_3)      &kp LS(NUMBER_4)             &kp LS(NUMBER_5)                  &kp LS(NUMBER_6)   &kp LS(NUMBER_7)          &kp LS(NUMBER_8)         &kp LS(NUMBER_9)        &kp JP_PIPE                     &trans
-&trans  &little_finger_l LGUI NUMBER_1  &hm_l LALT NUMBER_2  &hm_l LCTRL NUMBER_3  &hm_shift_l LSHIFT NUMBER_4  &kp NUMBER_5                      &kp JP_UNDERSCORE  &hm_shift_r RSHIFT JP_AT  &hm_r RCTRL JP_LBRACKET  &hm_r RALT JP_RBRACKET  &little_finger_r RGUI JP_TILDE  &trans
-&none   &kp NUMBER_6                    &kp N7               &kp NUMBER_8          &kp NUMBER_9                 &kp NUMBER_0      &trans  &trans  &kp JP_PLUS        &kp JP_ASTERISK           &kp JP_LBRACE            &kp JP_RBRACE           &kp JP_BACKQUOTE                &trans
-&none   &none                           &none                &lt 1 JP_CARET        &lt 2 JP_YEN                 &trans                            &trans             &lt 3 SEMICOLON           &lt 1 JP_COLON           &none                   &none                           &none
+&trans  &kp LS(NUMBER_1)                &kp LS(NUMBER_2)     &kp LS(NUMBER_3)       &kp LS(NUMBER_4)             &kp LS(NUMBER_5)                  &kp LS(NUMBER_6)   &kp LS(NUMBER_7)          &kp LS(NUMBER_8)         &kp LS(NUMBER_9)        &kp JP_PIPE                     &trans
+&trans  &little_finger_l LGUI NUMBER_1  &hm_l LALT NUMBER_2  &hm_l LCTRL NUMBER_3   &hm_shift_l LSHIFT NUMBER_4  &kp NUMBER_5                      &kp JP_UNDERSCORE  &hm_shift_r RSHIFT JP_AT  &hm_r RCTRL JP_LBRACKET  &hm_r RALT JP_RBRACKET  &little_finger_r RGUI JP_TILDE  &trans
+&none   &kp NUMBER_6                    &kp N7               &kp NUMBER_8           &kp NUMBER_9                 &kp NUMBER_0      &trans  &trans  &kp JP_PLUS        &kp JP_ASTERISK           &kp JP_LBRACE            &kp JP_RBRACE           &kp JP_BACKQUOTE                &trans
+&none   &none                           &none                &lt SYM JP_CARET       &lt NAV JP_YEN               &trans                            &trans             &lt FUNC SEMICOLON        &lt SYM JP_COLON         &none                   &none                           &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
-        mix_layer {
-            display-name = "Symbols";
+        nav_layer {
+            display-name = "Nav";
 
-            // TODO: Some binds are waiting for shifted keycode support.
-            // -------------------------------
-            // |       |  F1 |  F2 |  F3  |  F4  |  F5  |                   |  F6  |  F7   |  F8   |  F9  |  F10  |  F11  |
-            // |   `   |  1  |  2  |  3   |  4   |  5   |                   |  6   |  7    |  8    |  9   |   0   |  F12  |
-            // |       |  !  |  @  |  #   |  $   |  %   |                   |  ^   |  &    |  *    |  (   |   )   |   |   |
-            // |       |  =  |  -  |  +   |  {   |  }   |        |  |       |  [   |  ]    |  ;    |  :   |   \   |       |
-            //               |     |      |      |      |        |  |       |      |       |       |      |
+            // ----------------------------------------------------------------------------------------
+            // |      |      |      |      |      |                  | INS  | PGUP |  ↑   | PGDN |       |
+            // | GUI  | ALT  | CTRL | SHFT | TAB  |                  | BSPC |  ←   |  ↓   |  →   |       |
+            // | UNDO | CUT  | COPY | PASTE|      |        |  |     | DEL  | HOME |      | END  |       |
+            //                      |       |      |                  | ENT  |      |
+            //                      |       |      |                  | FUNC |      |
 
             bindings = <
-&none  &none      &none      &none      &none      &none                    &kp INSERT     &kp PAGE_UP  &kp UP    &kp PAGE_DOWN  &none  &none
-&none  &kp LGUI   &kp LALT   &kp LCTRL  &kp LSHFT  &kp TAB                  &kp BACKSPACE  &kp LEFT     &kp DOWN  &kp RIGHT      &none  &none
-&none  &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)  &none    &trans  &trans  &kp DEL        &kp HOME     &none     &kp END        &none  &none
-&none  &none      &none      &trans     &trans     &none                    &none          &lt 3 ENTER  &mo 1     &none          &none  &none
+&none  &none      &none      &none      &none      &none                    &kp INSERT     &kp PAGE_UP     &kp UP    &kp PAGE_DOWN  &none  &none
+&none  &kp LGUI   &kp LALT   &kp LCTRL  &kp LSHFT  &kp TAB                  &kp BACKSPACE  &kp LEFT        &kp DOWN  &kp RIGHT      &none  &none
+&none  &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)  &none    &trans  &trans  &kp DEL        &kp HOME        &none     &kp END        &none  &none
+&none  &none      &none      &trans     &trans     &none                    &none          &lt FUNC ENTER  &none     &none          &none  &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
-        move_layer {
-            display-name = "Move";
+        func_layer {
+            display-name = "Func";
 
-            // ------------------------------------------------------------------------------------------------------------
-            // | BTCLR | BT1  | BT2  |  BT3  |  BT4  |  BT5 |                |      |      |       |      |       |       |
-            // |       | INS  | PSCR | GUI   |       |      |                | PGUP |      |   ^   |      |       |       |
-            // |       | ALT  | CTRL | SHIFT |       | CAPS |                | PGDN |   <- |   v   |  ->  |  DEL  | BKSPC |
-            // |       | UNDO | CUT  | COPY  | PASTE |      |      |  |      |      |      |       |      |       |       |
-            //                |      |       |       |      |      |  |      |      |      |       |      |
+            // ----------------------------------------------------------------------------------------
+            // |  F1  |  F2  |  F3  |  F4  |      |                  | META |      |      |      |       |
+            // |  F5  |  F6  |  F7  |  F8  | TAB  |                  |      | SHFT | CTRL | ALT  | GUI   |
+            // |  F9  |  F10 |  F11 |  F12 |      |        |  |     |      |      |      |      |       |
+            //                      |       | ESC  |                  |      |      |
 
             bindings = <
-&none  &kp F1  &kp F2   &kp F3   &kp F4        &none                    &none  &none       &none      &none     &none     &none
-&none  &kp F5  &kp F6   &kp F7   &kp F8        &kp TAB                  &none  &kp RSHIFT  &kp RCTRL  &kp RALT  &kp RGUI  &none
-&none  &kp F9  &kp F10  &kp F11  &kp F12       &none    &trans  &trans  &none  &none       &none      &none     &none     &none
-&none  &none   &none    &mo 1    &lt 2 ESCAPE  &none                    &none  &trans      &trans     &none     &none     &none
+&none  &kp F1  &kp F2   &kp F3   &kp F4      &none                    &mo META  &none       &none      &none     &none     &none
+&none  &kp F5  &kp F6   &kp F7   &kp F8      &kp TAB                  &none     &kp RSHIFT  &kp RCTRL  &kp RALT  &kp RGUI  &none
+&none  &kp F9  &kp F10  &kp F11  &kp F12     &none    &trans  &trans  &none     &none       &none      &none     &none     &none
+&none  &none   &none    &none    &kp ESCAPE  &none                    &none     &trans      &trans     &none     &none     &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
@@ -281,15 +262,13 @@
         meta_layer {
             display-name = "Meta";
 
-            // ------------------------------------------------------------------------------------------------------------
-            // | BTCLR | BT1  | BT2  |  BT3  |  BT4  |  BT5 |                |      |      |       |      |       |       |
-            // |       | INS  | PSCR | GUI   |       |      |                | PGUP |      |   ^   |      |       |       |
-            // |       | ALT  | CTRL | SHIFT |       | CAPS |                | PGDN |   <- |   v   |  ->  |  DEL  | BKSPC |
-            // |       | UNDO | CUT  | COPY  | PASTE |      |      |  |      |      |      |       |      |       |       |
-            //                |      |       |       |      |      |  |      |      |      |       |      |
+            // FUNC (右親指 45) を押したまま Y の位置を押し続けると入る
+            // ----------------------------------------------------------------------------------------
+            // | BT   | BT   | BT   | BT   |      |                  |      |      |      |      |       |
+            // | CLR  | SEL2 | SEL1 | SEL0 |      |                  |      |      |      |      |       |
 
             bindings = <
-&none  &bt BT_CLR_ALL  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &none                  &none  &none  &none  &none  &none  &none
+&none  &bt BT_CLR      &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &none                  &none  &none  &none  &none  &none  &none
 &none  &none           &none         &none         &none         &none                  &none  &none  &none  &none  &none  &none
 &none  &none           &none         &none         &none         &none  &trans  &trans  &none  &none  &none  &none  &none  &none
 &none  &none           &none         &none         &none         &none                  &none  &none  &none  &none  &none  &none
