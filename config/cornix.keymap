@@ -15,7 +15,8 @@
 
 // shift
 
-#define HM_TAPPING_TERM_SHIFT 190
+#define HM_TAPPING_TERM_SHIFT_L 160  // 2026-10: 190 -> 160 (F を「/」より先に離すと「？」が「ｆ・」になる対策)
+#define HM_TAPPING_TERM_SHIFT_R 190
 #define HM_PRIOR_IDLE_SHIFT   70
 
 // layer-tap (&lt)
@@ -106,7 +107,7 @@
             bindings = <&kp>, <&kp>;
 
             flavor = "balanced";
-            tapping-term-ms = <HM_TAPPING_TERM_SHIFT>;
+            tapping-term-ms = <HM_TAPPING_TERM_SHIFT_L>;
             quick-tap-ms = <200>;
             require-prior-idle-ms = <HM_PRIOR_IDLE_SHIFT>;
             hold-trigger-key-positions = <KEYS_R KEYS_T>;
@@ -119,7 +120,7 @@
             bindings = <&kp>, <&kp>;
 
             flavor = "balanced";
-            tapping-term-ms = <HM_TAPPING_TERM_SHIFT>;
+            tapping-term-ms = <HM_TAPPING_TERM_SHIFT_R>;
             quick-tap-ms = <200>;
             require-prior-idle-ms = <HM_PRIOR_IDLE_SHIFT>;
             hold-trigger-key-positions = <KEYS_L KEYS_T>;
