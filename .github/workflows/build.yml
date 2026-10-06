@@ -2,11 +2,14 @@ name: Build ZMK firmware
 on:
   workflow_dispatch:
   push:
+    # tags-ignore だけを書くとブランチへの push で起動しなくなるため、branches を明示する
+    branches:
+      - "**"
     paths:
-      - "boards/*"
-      - "config/*"
-    tags-ignore:
-      - "*"
+      - "boards/**"
+      - "config/**"
+      - "build.yaml"
+      - ".github/workflows/build.yml"
 
 jobs:
   build:
