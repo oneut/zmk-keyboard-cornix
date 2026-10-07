@@ -24,6 +24,10 @@
 #define LT_TAPPING_TERM 250
 #define LT_QUICK_TAP    0    // 2026-10: 175 -> 0 (変換直後に Space 長押し + 右親指で Enter を打つと、quick-tap で Space になっていたため)
 
+// Space (&lt_spc)
+
+#define SPC_TAPPING_TERM 250
+
 // layers
 
 #define BASE 0  // 英字
@@ -173,6 +177,22 @@
             tapping-term-ms = <LT_TAPPING_TERM>;
             quick-tap-ms = <LT_QUICK_TAP>;
         };
+
+        // Space 専用の layer-tap (Base の左親指)。
+        // hold-preferred: Space を押している間に他のキーを押した瞬間に NAV に確定する。
+        // Enter は「Space 保持 + 右親指 45」で打つため、balanced だと両親指を離す順番で
+        // Space (変換) になっていた。2026-10: balanced -> hold-preferred (dca30b6 以前と同じ挙動)。
+        // 副作用: Space を離す前に次の文字を押すと NAV のキーになる (これまで報告なし)。
+        // quick-tap は 0 のまま (変換直後の Space 保持がタップに固定されないように)。
+        lt_spc: layer_tap_space {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            bindings = <&mo>, <&kp>;
+
+            flavor = "hold-preferred";
+            tapping-term-ms = <SPC_TAPPING_TERM>;
+            quick-tap-ms = <0>;
+        };
     };
 
     keymap {
@@ -193,7 +213,7 @@
 &none  &kp Q                    &kp W         &kp E                 &kp R                &kp T                        &kp Y  &kp U                 &kp I               &kp O         &kp P                        &none
 &none  &little_finger_l LGUI A  &hm_l LALT S  &hm_l LCTRL D         &hm_shift_l LSHFT F  &kp G                        &kp H  &hm_shift_r RSHIFT J  &hm_r RCTRL K       &hm_r RALT L  &little_finger_r RGUI MINUS  &none
 &none  &kp Z                    &kp X         &kp C                 &kp V                &kp B  &kp C_MUTE  &mkp MB3  &kp N  &kp M                 &kp COMMA           &kp DOT       &kp SLASH                    &none
-&none  &none                    &none         &lt SYM INT_MUHENKAN  &lt NAV SPACE        &none                        &none  &mo FUNC              &lt SYM INT_HENKAN  &none         &none                        &none
+&none  &none                    &none         &lt SYM INT_MUHENKAN  &lt_spc NAV SPACE    &none                        &none  &mo FUNC              &lt SYM INT_HENKAN  &none         &none                        &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
