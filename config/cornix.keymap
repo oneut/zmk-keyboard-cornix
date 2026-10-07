@@ -22,7 +22,7 @@
 // layer-tap (&lt)
 
 #define LT_TAPPING_TERM 250
-#define LT_QUICK_TAP    175  // urob と同じ値。タップ直後に再度押したままにするとタップ側 (Space のリピート等) になる
+#define LT_QUICK_TAP    0    // 2026-10: 175 -> 0 (変換直後に Space 長押し + 右親指で Enter を打つと、quick-tap で Space になっていたため)
 
 // layers
 
