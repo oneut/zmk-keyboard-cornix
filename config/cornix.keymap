@@ -269,12 +269,15 @@
             // |  F5  |  F6  |  F7  |  F8  | TAB  |                  |      | SHFT | CTRL | ALT  | GUI   |
             // |  F9  |  F10 |  F11 |  F12 |      |        |  |     |      |      |      |      |       |
             //                      |       | ESC  |                  |      |      |
+            // 42 の Esc は &lt NAV ESCAPE (タップで Esc、長押しで NAV)。NAV は FUNC より下のレイヤーなので
+            // 長押し側は実質何もしない = タップしたときだけ Esc を 1 回出す (レイヤー順に依存)。
+            // &kp ESCAPE にすると押している間 Esc が押されっぱなしになり、OS のキーリピートで連続入力されるため戻した。
 
             bindings = <
 &none  &kp F1  &kp F2   &kp F3   &kp F4      &none                    &mo META  &none       &none      &none     &none     &none
 &none  &kp F5  &kp F6   &kp F7   &kp F8      &kp TAB                  &none     &kp RSHIFT  &kp RCTRL  &kp RALT  &kp RGUI  &none
 &none  &kp F9  &kp F10  &kp F11  &kp F12     &none    &trans  &trans  &none     &none       &none      &none     &none     &none
-&none  &none   &none    &none    &kp ESCAPE  &none                    &none     &trans      &trans     &none     &none     &none
+&none  &none   &none    &none    &lt NAV ESCAPE  &none                &none     &trans      &trans     &none     &none     &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
