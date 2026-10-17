@@ -81,7 +81,10 @@
             #binding-cells = <2>;
             bindings = <&kp>, <&kp>;
 
-            flavor = "balanced";
+            // tap-preferred: tapping-term を超えて押し続けたときだけ Ctrl/Alt になる。
+            // 2026-10: balanced -> tap-preferred (速く打つと Ctrl/Alt が誤発火するため)。
+            // 副作用: 修飾キーを tapping-term 未満で離すショートカットは文字になる。
+            flavor = "tap-preferred";
             tapping-term-ms = <HM_TAPPING_TERM>;
             quick-tap-ms = <200>;                // repeat on tap-into-hold
             require-prior-idle-ms = <HM_PRIOR_IDLE>;
@@ -94,7 +97,10 @@
             #binding-cells = <2>;
             bindings = <&kp>, <&kp>;
 
-            flavor = "balanced";
+            // tap-preferred: tapping-term を超えて押し続けたときだけ Ctrl/Alt になる。
+            // 2026-10: balanced -> tap-preferred (速く打つと Ctrl/Alt が誤発火するため)。
+            // 副作用: 修飾キーを tapping-term 未満で離すショートカットは文字になる。
+            flavor = "tap-preferred";
             tapping-term-ms = <HM_TAPPING_TERM>;
             quick-tap-ms = <200>;
             require-prior-idle-ms = <HM_PRIOR_IDLE>;
