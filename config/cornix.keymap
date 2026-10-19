@@ -121,7 +121,10 @@
             quick-tap-ms = <200>;
             require-prior-idle-ms = <HM_PRIOR_IDLE_SHIFT>;
             hold-trigger-key-positions = <KEYS_R KEYS_T>;
-            hold-trigger-on-release;
+            // 2026-10: hold-trigger-on-release を外した。付けていると F↓ より前に押していた a の解放
+            // (A↓ F↓ A↑ /↓) が「最初の他キー」として記録され、tapping-term 経過後でも f に戻されて
+            // 「？」が「ｆ・」になるため。
+            // 副作用: F↓ → D↓ (Ctrl) を tapping-term 未満で重ねると f になる。D を先に押すか、F を少し長く押す。
         };
 
         hm_shift_r: hm_shift_r {
