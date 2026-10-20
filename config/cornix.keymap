@@ -21,7 +21,7 @@
 
 // little finger (GUI)
 
-#define LF_TAPPING_TERM 220  // 2026-10: 280 -> 220 (- 長押し + q の Super+q が、- を 280ms 未満で離して「-q」になるため。左右共通)
+#define LF_TAPPING_TERM 250  // 2026-10: 280 -> 250 (- 長押し + q の Super+q が、- を 280ms 未満で離して「-q」になるため。左右共通。220 も検討したが左 a の super+m 対策との折衷。まだ -q が出るなら右だけ下げる)
 
 // layer-tap (&lt)
 
