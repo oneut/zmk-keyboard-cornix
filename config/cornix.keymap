@@ -19,6 +19,10 @@
 #define HM_TAPPING_TERM_SHIFT_R 190
 #define HM_PRIOR_IDLE_SHIFT   70
 
+// little finger (GUI)
+
+#define LF_TAPPING_TERM 220  // 2026-10: 280 -> 220 (- 長押し + q の Super+q が、- を 280ms 未満で離して「-q」になるため。左右共通)
+
 // layer-tap (&lt)
 
 #define LT_TAPPING_TERM 250
@@ -152,7 +156,7 @@
             // ローマ字では "am" のような a → 反対の手 のロールが多く、balanced だと super+m 等が誤発火するため。
             // (prior-idle / quick-tap / hold-trigger-key-positions の条件は引き続き効く。語頭の a は prior-idle では守れない)
             flavor = "tap-preferred";
-            tapping-term-ms = <280>;
+            tapping-term-ms = <LF_TAPPING_TERM>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <150>;
             hold-trigger-key-positions = <KEYS_R KEYS_T>;
@@ -168,7 +172,7 @@
             // ローマ字では "am" のような a → 反対の手 のロールが多く、balanced だと super+m 等が誤発火するため。
             // (prior-idle / quick-tap / hold-trigger-key-positions の条件は引き続き効く。語頭の a は prior-idle では守れない)
             flavor = "tap-preferred";
-            tapping-term-ms = <280>;
+            tapping-term-ms = <LF_TAPPING_TERM>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <150>;
             hold-trigger-key-positions = <KEYS_L KEYS_T>;
